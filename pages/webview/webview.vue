@@ -7,7 +7,7 @@
 	export default {
 		onLoad(options) {
 			// console.log(options)
-			this.url = options.target
+			this.url = decodeURI(options.target)
 		},
 		data() {
 			return {
