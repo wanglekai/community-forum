@@ -177,15 +177,29 @@
 				this.swiperSliderFeedsHeight = this.swiperSliderHeight
 			})
 		},
-		onPageScroll(e) {
-			// console.log(e.scrollTop)
-			// const nav = this.$refs.navbar.$el
+		// 监听用户下拉动作 
+		onPullDownRefresh() {
+			console.log('onPullDownRefresh')
+			this.getAdverts()
 			
-			// if (e.scrollTop >= nav.offsetTop) {
-			// 	nav.classList.add('on')
-			// } else {
-			// 	nav.classList.remove('on')
-			// }
+			if (this.curIdx === 0) {
+				this.$refs.uWaterfall.clear()
+				this.getFeeds()
+			} else {
+				this.getNews()
+			}
+		},
+		// 页面上拉触底事件的处理函数 
+		onReachBottom() {
+			console.log('onReachBottom')
+			if (this.curIdx === 0) {
+				this.getFeeds()
+				this.swiperSliderFeedsHeight = this.swiperSliderHeight
+			} else {
+				this.getNews()
+			}
+		},
+		onPageScroll(e) {
 			if (e.scrollTop >= 200) {
 				this.isShowTopBar = true
 			} else {
@@ -208,10 +222,9 @@
 			},
 			// 获取推荐信息列表
 			async getFeeds () {
-				let { feeds } = await this.$u.api.getFeeds()
+				const { feeds } = await this.$u.api.getFeeds()
 				
-				
-				this.feedList = feeds.map(item => {
+				const feedsList = feeds.map(item => {
 					return {
 						id: item.id,
 						image: this.baseURL + item.images[0].file,
@@ -221,12 +234,14 @@
 						isLike: item.has_like
 					}
 				})
+				
+				this.feedList = [...this.feedList, ...feedsList]
 			},
 			// 获取首页资讯
 			async getNews() {
-				let result = await this.$u.api.getNews()
-				this.swiperSliderNewsHeight = (result.length * 100) + 150 + 'px'
-				this.newsList = result.map(item => {
+				const result = await this.$u.api.getNews()
+				
+				const newsList = result.map(item => {
 					return {
 						id: item.id,
 						title: item.title,
@@ -236,6 +251,9 @@
 					}
 				})
 				
+				this.newsList = [...this.newsList, ...newsList]
+				
+				this.swiperSliderNewsHeight = (this.newsList.length * 100) + 150 + 'px'
 			},
 			// 首页切换 推荐和资讯
 			swiperSliderFinsh (swiper) {
