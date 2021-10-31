@@ -43,38 +43,79 @@
 			:interval="3000" 
 			:duration="300" 
 			:current="curIdx"
-			style="height:10000upx">
+			:style="'height:' + swiperSliderHeight"
+			@animationfinish="swiperSliderFinsh">
+			<!-- 推荐内容 -->
 			<swiper-item>
-				<!-- 推荐内容 -->
-				<view 
-					class="swiper-item recommend" 
-					v-for="item in feedList"
-					:key="item.id">
-					<image 
-						class="main-img" 
-						:src="item.image" 
-						mode="aspectFill"></image>
-					<view class="info-wrapper">
-						<text class="title" v-text="item.title"></text>
-						<view class="info-content">
-							<view class="info-user">
-								<image 
-									class="icon icon-user" 
-									:src="item.avatar" 
-									mode="aspectFit"></image>
-								<text class="nickname" v-text="item.nickname"></text>
+				<view class="swiper-item recommend" >
+					<sns-waterfall v-model="feedList" ref="uWaterfall">
+						<template v-slot:left="{leftList}">
+							<view class="demo-warter" v-for="(item, index) in leftList" :key="index">
+								<!-- 警告：微信小程序中需要hx2.8.11版本才支持在template中结合其他组件，比如下方的lazy-load组件 -->
+								<u-lazy-load 
+									threshold="-450" 
+									border-radius="10" 
+									class="main-img" 
+									:image="item.image"
+									:index="index"></u-lazy-load>
+								<!-- <image
+									class="main-img" 
+									:src="item.image" 
+									mode="aspectFill"></image> -->
+								<view class="info-wrapper">
+									<text class="title" v-text="item.title"></text>
+									<view class="info-content">
+										<view class="info-user">
+											<image 
+												class="icon icon-user" 
+												:src="item.avatar" 
+												mode="aspectFit"></image>
+											<text class="nickname" v-text="item.nickname"></text>
+										</view>
+										<!-- <image class="icon icon-like" src="../../static/love.png"></image> -->
+										<view 
+										:class="['icon icon-like', { 'on': item.isLike }]" 
+										@tap="handleLikeClick"></view>
+									</view>
+								</view>
 							</view>
-							<!-- <image class="icon icon-like" src="../../static/love.png"></image> -->
-							<view 
-							:class="['icon icon-like', { 'on': item.isLike }]" 
-							@tap="handleLikeClick"></view>
-						</view>
-					</view>
-					
+						</template>
+						<template v-slot:right="{rightList}">
+							<view class="demo-warter" v-for="(item, index) in rightList" :key="index">
+								<u-lazy-load
+									threshold="-450" 
+									border-radius="10" 
+									class="main-img" 
+									:image="item.image"
+									:index="index"></u-lazy-load>
+								<!-- <image
+									class="main-img" 
+									:src="item.image" 
+									mode="aspectFill"></image> -->
+								<view class="info-wrapper">
+									<text class="title" v-text="item.title"></text>
+									<view class="info-content">
+										<view class="info-user">
+											<image 
+												class="icon icon-user" 
+												:src="item.avatar" 
+												mode="aspectFit"></image>
+											<text class="nickname" v-text="item.nickname"></text>
+										</view>
+										<!-- <image class="icon icon-like" src="../../static/love.png"></image> -->
+										<view 
+										:class="['icon icon-like', { 'on': item.isLike }]" 
+										@tap="handleLikeClick"></view>
+									</view>
+								</view>
+							</view>
+						</template>
+					</sns-waterfall>
 				</view>
 			</swiper-item>
+			
+			<!-- 新闻列表 -->
 			<swiper-item>
-				<!-- 新闻列表 -->
 				<view 
 					class="swiper-item news"
 					v-for="item in newsList"
@@ -99,34 +140,47 @@
 </template>
 
 <script>
+	import snsWaterfall from '@/components/sns-waterfall.vue'
 	export default {
+		components:{
+			snsWaterfall
+		},
 		data() {
 			return {
 				curIdx: 0,
 				adList: [],
 				feedList: [],
 				newsList: [],
-				isLike: false
+				isLike: false,
+				swiperSliderHeight: '0',
+				swiperSliderFeedsHeight: '0',
+				swiperSliderNewsHeight: '0'
 			}
 		},
 		onLoad() {
 			this.getAdverts()
 			this.getFeeds()
 			this.getNews()
+			
+			uni.$on('swiperHeightChange', height =>{
+				console.log(height)
+				this.swiperSliderHeight = height + 150 + 'px'
+				this.swiperSliderFeedsHeight = this.swiperSliderHeight
+			})
 		},
 		methods: {
+			// 获取首页顶部广告位列表
 			async getAdverts() {
 				const res = await this.$u.api.getAdvert({
 					space: '1,2,3'
 				})
-				
 				this.adList = res
 			},
+			// 获取推荐信息列表
 			async getFeeds () {
 				let { feeds } = await this.$u.api.getFeeds()
 				
-				// console.log(result)
-				// console.log(this.baseURL)
+				
 				this.feedList = feeds.map(item => {
 					return {
 						id: item.id,
@@ -138,10 +192,10 @@
 					}
 				})
 			},
+			// 获取首页资讯
 			async getNews() {
 				let result = await this.$u.api.getNews()
-				
-				// console.log(result)
+				this.swiperSliderNewsHeight = (result.length * 100) + 150 + 'px'
 				this.newsList = result.map(item => {
 					return {
 						id: item.id,
@@ -151,10 +205,26 @@
 						image: this.baseURL + item.image.id
 					}
 				})
-			}
-			,
+				
+			},
+			// 首页切换 推荐和资讯
 			handleToggleTag (idx) {
 				this.curIdx = idx
+				
+				if (idx === 0) {
+					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+				} else {
+					this.swiperSliderHeight = this.swiperSliderNewsHeight
+				}
+			},
+			swiperSliderFinsh (swiper) {
+				// console.log(swiper)
+				let idx = swiper.detail.current
+				if (idx === 0) {
+					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+				} else {
+					this.swiperSliderHeight = this.swiperSliderNewsHeight
+				}
 			},
 			handleLikeClick () {
 				this.isLike = !this.isLike
@@ -217,12 +287,17 @@
 	}
 	
 	.content-wrapper {
-		padding: 0 20upx;
+
 		.swiper-item.recommend {
-			width: 46%;
+			// margin-left: 10upx;
+			margin-bottom: 10upx;
 			border-radius: 20upx;
 			overflow: hidden;
-			background-color: #fff;
+			
+			.demo-warter {
+				margin: 5px;
+				background-color: #fff;
+			}
 			.info-wrapper {
 				padding: 10upx;
 				
@@ -242,7 +317,7 @@
 						align-items: center;
 						
 						.nickname {
-							margin-left: 10upx;
+							// margin-left: 10upx;
 						}
 					}
 					.icon-like {
