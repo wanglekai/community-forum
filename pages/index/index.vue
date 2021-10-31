@@ -1,5 +1,12 @@
 <template>
-	<view class="index-container">
+	<view class="index-container">	
+		<uni-nav-bar :fixed="true" v-show="isShowTopBar">
+			<view class="index-toggle-btns">
+				<text :class="['tag', {'on': curIdx === 0}]" @tap="handleToggleTab(0)">推荐</text>
+				<text :class="['tag', {'on': curIdx === 1}]" @tap="handleToggleTab(1)">资讯</text>
+			</view>
+		</uni-nav-bar>
+		
 		<!-- 首页顶部导航 -->
 		<swiper 
 			class="index-swiper"
@@ -34,10 +41,9 @@
 		
 		<!-- 切换标签 -->
 		<view class="index-toggle-btns">
-			<text :class="['tag', {'on': curIdx === 0}]" @tap="handleToggleTag(0)">推荐</text>
-			<text :class="['tag', {'on': curIdx === 1}]" @tap="handleToggleTag(1)">资讯</text>
+			<text :class="['tag', {'on': curIdx === 0}]" @tap="handleToggleTab(0)">推荐</text>
+			<text :class="['tag', {'on': curIdx === 1}]" @tap="handleToggleTab(1)">资讯</text>
 		</view>
-		
 		<swiper 
 			class="content-wrapper"
 			:interval="3000" 
@@ -53,7 +59,7 @@
 							<view class="demo-warter" v-for="(item, index) in leftList" :key="index">
 								<!-- 警告：微信小程序中需要hx2.8.11版本才支持在template中结合其他组件，比如下方的lazy-load组件 -->
 								<u-lazy-load 
-									threshold="-450" 
+									threshold="-150" 
 									border-radius="10" 
 									class="main-img" 
 									:image="item.image"
@@ -154,7 +160,10 @@
 				isLike: false,
 				swiperSliderHeight: '0',
 				swiperSliderFeedsHeight: '0',
-				swiperSliderNewsHeight: '0'
+				swiperSliderNewsHeight: '0',
+				feedScrollTop: 0,
+				newsScrollTop: 0,
+				isShowTopBar: false
 			}
 		},
 		onLoad() {
@@ -167,6 +176,27 @@
 				this.swiperSliderHeight = height + 150 + 'px'
 				this.swiperSliderFeedsHeight = this.swiperSliderHeight
 			})
+		},
+		onPageScroll(e) {
+			// console.log(e.scrollTop)
+			// const nav = this.$refs.navbar.$el
+			
+			// if (e.scrollTop >= nav.offsetTop) {
+			// 	nav.classList.add('on')
+			// } else {
+			// 	nav.classList.remove('on')
+			// }
+			if (e.scrollTop >= 200) {
+				this.isShowTopBar = true
+			} else {
+				this.isShowTopBar = false
+			}
+			
+			if (this.curIdx === 0) {
+				this.feedScrollTop = e.scrollTop
+			} else {
+				this.newsScrollTop = e.scrollTop
+			}
 		},
 		methods: {
 			// 获取首页顶部广告位列表
@@ -208,22 +238,26 @@
 				
 			},
 			// 首页切换 推荐和资讯
-			handleToggleTag (idx) {
-				this.curIdx = idx
-				
-				if (idx === 0) {
-					this.swiperSliderHeight = this.swiperSliderFeedsHeight
-				} else {
-					this.swiperSliderHeight = this.swiperSliderNewsHeight
-				}
-			},
 			swiperSliderFinsh (swiper) {
 				// console.log(swiper)
 				let idx = swiper.detail.current
+				this.handleToggleTab(idx)
+			},
+			handleToggleTab (idx) {
+				console.log(idx)
+				this.curIdx = idx
 				if (idx === 0) {
 					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+					uni.pageScrollTo({
+						scrollTop: this.feedScrollTop,
+						duration:0
+					})
 				} else {
 					this.swiperSliderHeight = this.swiperSliderNewsHeight
+					uni.pageScrollTo({
+						scrollTop: this.newsScrollTop,
+						duration:0
+					})
 				}
 			},
 			handleLikeClick () {
@@ -250,8 +284,7 @@
 
 	.tag-nav-wrapper {
 		display: flex;
-		justify-content: space-around;
-
+		justify-content: space-around;;
 		.tab-item {
 			display: flex;
 			align-items: center;
@@ -276,7 +309,9 @@
 	.index-toggle-btns {
 		display: flex;
 		justify-content: center;
-		margin: 10px;
+		padding: 20upx;
+		margin: 0 auto;
+
 		.tag {
 			font-size:20px;
 			margin-right: 10px;
