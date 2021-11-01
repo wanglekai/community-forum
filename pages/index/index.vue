@@ -191,13 +191,13 @@
 		},
 		// 页面上拉触底事件的处理函数 
 		onReachBottom() {
-			console.log('onReachBottom')
-			if (this.curIdx === 0) {
-				this.getFeeds()
-				this.swiperSliderFeedsHeight = this.swiperSliderHeight
-			} else {
-				this.getNews()
-			}
+			// console.log('onReachBottom')
+			// if (this.curIdx === 0) {
+			// 	this.getFeeds()
+			// 	this.swiperSliderFeedsHeight = this.swiperSliderHeight
+			// } else {
+			// 	this.getNews()
+			// }
 		},
 		onPageScroll(e) {
 			if (e.scrollTop >= 200) {
