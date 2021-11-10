@@ -1,5 +1,6 @@
 <template>
 	<view class="index-container">
+		
 		<view class="header-box">
 			<!-- 顶部广告位轮播图 -->
 			<swiper 
@@ -35,18 +36,109 @@
 
 			<!-- Tab 选项卡 -->
 			<view class="tabs-box">
-				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
-				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
+				<view 
+					class="one-nav" 
+					:class="currentSwiperIndex === 0 ? 'nav-actived' : '' " 
+					@tap="swiperChange(0)">推荐</view>
+				<view 
+					class="one-nav" 
+					:class="currentSwiperIndex === 1 ? 'nav-actived' : '' " 
+					@tap="swiperChange(1)">资讯</view>
 			</view>
 		</view>
 
 		
+		<!-- 内容轮播导航实现 -->
+		<swiper 
+			class="swiper-box" 
+			:style=" 'height:'+ swiperSliderHeight " 
+			:current="currentSwiperIndex" 
+			@animationfinish="swiperSlider">
+			<!-- 推荐动态实现 -->
+			<swiper-item class="swiper-item">
+				<view class="page-item sns-now">
+					<view class="feeds-box">
+						<waterfall-sns v-model="feedsList" :addTime="200" ref="waterfall">
+							<template v-slot:left="{leftList}">
+								<view class="feed-one" v-for="(item, index) in leftList" :key="index">
+									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+										<view class="feed-info">
+											<view class="iview">
+												<image class="avatar" :src=" item.avatar" />
+												<text class="name u-line-1">{{ item.name }}</text>
+											</view>
+											<view class="iview">
+												<view class="ilike" @tap.stop="clickLove(item)">
+													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+													<image v-else src="@/static/love.png" class="micon" />
+													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+												</view>
+											</view>
+										</view>
+									</navigator>
+								</view>
+							</template>
+							<template v-slot:right="{rightList}">
+								<view class="feed-one" v-for="(item, index) in rightList" :key="index">
+									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+										<view class="feed-info">
+											<view class="iview">
+												<image class="avatar" :src=" item.avatar" />
+												<text class="name u-line-1">{{ item.name }}</text>
+											</view>
+											<view class="iview">
+												<view class="ilike" @tap.stop="clickLove(item)">
+													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+													<image v-else src="@/static/love.png" class="micon" />
+													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+												</view>
+											</view>
+										</view>
+									</navigator>
+								</view>
+							</template>
+						</waterfall-sns>
+					</view>
+				</view>
+			</swiper-item>
+			<!-- 资讯列表实现 -->
+			<swiper-item class="swiper-item sns-news">
+				<view v-for="(item, index) in newsList" :key="index">
+					<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
+						<view class="left">
+							<view class="title u-line-2">{{item.title}}</view>
+							<view class="uinfo">
+								<view class="iview">
+									<view class="utime">
+										<text class="name">{{ item.author }}</text>
+									</view>
+								</view>
+								<text class="uptime">{{ item.created_at  }}发布</text>
+							</view>
+						</view>
+						<view class="right">
+							<image class="pic" mode="aspectFill" :src="item.cover" />
+						</view>
+					</navigator>
+				</view>
+			</swiper-item>
+
+		</swiper>
 		
 	</view>
 </template>
 
 <script>
+	import WaterfallSns from '@/components/waterfall-sns/index.vue'
+
 	export default {
+		components: {
+			WaterfallSns
+		},
 		data() {
 			return {
 				// navBar 显示状态控制
@@ -70,18 +162,27 @@
 		},
 		onLoad() {
 			this.getAdverts()
+			this.getFeedsList()
+			this.getNewsList()
+		},
+		onPageScroll(event) {
+			if (this.currentSwiperIndex === 0) {
+				this.oldFeedsScrollTop = event.scrollTop
+			} else {
+				this.oldNewsScrollTop = event.scrollTop
+			}
+			if (event.scrollTop > 220) {
+				this.navBarShowTag = true
+			} else {
+				this.navBarShowTag = false
+			}
 		},
 		methods: {
-			gotoFeeds(url) {
-				uni.switchTab({
-					url
-				})
-			},
+			// 请求 广告轮播图信息
 			async getAdverts() {
 				let adverts = await this.$u.api.getAdvert({
 					space: '1,2,3'
 				})
-				// console.log(adverts)
 				this.swiperAdList = adverts.map(item => {
 					return {
 						id: item.id,
@@ -90,32 +191,107 @@
 					}
 				})
 			},
+			// 请求 feeds 列表数据
+			async getFeedsList() {
+				let feeds = await this.$u.api.getFeeds()
+				// console.log(feeds)
+				let feedList = feeds.feeds.map(item => {
+					return {
+						...item,
+						cover: this.BaseFileURL + item.images[0].file,
+						avatar: !!item.user.avatar ? item.user.avatar.url : '/static/nopic.png',
+						name: item.user.name,
+					}
+				})
+				this.feedsList = [...this.feedsList, ...feedList]
+				// 在这里注册一个 uniAPP 的顶层事件，用来作为数据通信
+				uni.$once("swiperHeightChange", height => {
+					console.log('计算出来的高度为:'+ height)
+					this.swiperSliderFeedsHeight = height
+					this.swiperSliderHeight = height
+				})
+			},
+			// 请求资讯列表数据
+			async getNewsList() {
+				let news = await this.$u.api.getNews()
+				let newsList = news.map(item => {
+					return {
+						...item,
+						cover: this.BaseFileURL + item.image.id
+					}
+				})
+
+				this.newsList = [...this.newsList, ...newsList]
+				this.swiperSliderNewsHeight = this.newsList.length * 95 + 100 + 'px'
+				this.swiperSliderHeight = this.swiperSliderNewsHeight
+			},
+			// 页面滑动左右分页的时候实现的效果
+			swiperSlider(event) {
+				if (event.detail.current === 0) {
+					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+					uni.pageScrollTo({
+						duration: 0, //过渡时间必须为0，uniapp bug，否则运行到手机会报错
+						scrollTop: this.oldFeedsScrollTop, //滚动到目标位置
+					})
+				} else {
+					this.swiperSliderHeight = this.swiperSliderNewsHeight
+					uni.pageScrollTo({
+						duration: 0, //过渡时间必须为0，uniapp bug，否则运行到手机会报错
+						scrollTop: this.oldNewsScrollTop, //滚动到目标位置
+					})
+				}
+				this.currentSwiperIndex = event.detail.current
+			},
+			// 点击按钮实现切换效果
+			swiperChange(index) {
+				if (index === 0) {
+					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+					uni.pageScrollTo({
+						duration: 0, //过渡时间必须为0，uniapp bug，否则运行到手机会报错
+						scrollTop: this.oldFeedsScrollTop, //滚动到目标位置
+					})
+				} else {
+					this.swiperSliderHeight = this.swiperSliderNewsHeight
+					uni.pageScrollTo({
+						duration: 0, //过渡时间必须为0，uniapp bug，否则运行到手机会报错
+						scrollTop: this.oldNewsScrollTop, //滚动到目标位置
+					})
+				}
+				this.currentSwiperIndex = index
+			},
+			gotoFeeds(url) {
+				uni.switchTab({
+					url
+				})
+			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-	
+	#sns {
+		background-color: #f1f1f1;
+	}
+
 	// 推荐、咨询 按钮样式
-		.tabs-box {
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			width: 750upx;
-	
-			.one-nav {
-				width: 120upx;
-				color: #9B9B9B;
-				font-size: 36upx;
-				text-align: center;
-				font-weight: blod;
-	
-				&.nav-actived {
-					color: #0050FF;
-				}
+	.tabs-box {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		width: 750upx;
+
+		.one-nav {
+			width: 120upx;
+			color: #9B9B9B;
+			font-size: 36upx;
+			text-align: center;
+			font-weight: blod;
+
+			&.nav-actived {
+				color: #0050FF;
 			}
 		}
-	
+	}
 
 	.header-box {
 		position: relative;
@@ -149,6 +325,7 @@
 			top: 355upx;
 			z-index: 9;
 		}
+
 		// 新鲜事 活动墙 按钮样式
 		.card-header {
 			position: absolute;
@@ -230,6 +407,176 @@
 
 				&.nav-actived {
 					color: #0050FF;
+				}
+			}
+		}
+	}
+
+	// 此刻 栏目样式\
+	.swiper-box {
+		background-color: #f1f1f1;
+		padding: 60upx 0 40upx;
+	}
+
+	.sns-now {
+
+		// 动态相关瀑布流样式
+		.feeds-box {
+			width: 735upx;
+			margin-left: 13upx;
+			padding-bottom: 20upx;
+
+			.feed-one {
+				width: 358upx;
+				margin-bottom: 12upx;
+				background-color: #FFF;
+				border-radius: 20upx;
+
+				position: relative;
+
+				.feed-img {
+					width: 358upx;
+					height: 300upx;
+					border-radius: 10upx;
+				}
+
+				.feed-title {
+					width: 350upx;
+					margin-top: 15upx;
+					margin-left: 10upx;
+					font-size: 28upx;
+					line-height: 40upx;
+					color: #001432;
+					text-align: left;
+				}
+
+				.feed-info {
+					display: flex;
+					flex-direction: row;
+					flex-wrap: nowrap;
+					justify-content: space-between;
+					align-items: center;
+					align-content: center;
+					margin-top: 10upx;
+					font-size: 20upx;
+					color: #666;
+					padding: 0 10upx 16upx;
+
+					.iview {
+						display: flex;
+						flex-direction: row;
+						flex-wrap: nowrap;
+						justify-content: space-between;
+						align-items: center;
+						align-content: center;
+
+						.ilike {
+							display: flex;
+							flex-direction: row;
+							flex-wrap: nowrap;
+							justify-content: space-between;
+							align-items: center;
+							align-content: center;
+							height: 60upx;
+							padding: 0 10upx;
+							background-color: #FFFFFF;
+						}
+					}
+
+					.avatar {
+						margin-right: 10upx;
+						height: 40upx;
+						width: 40upx;
+						border-radius: 50%;
+						border: 1upx solid #eee;
+					}
+
+					.name {
+						max-width: 120upx;
+						color: #757474;
+					}
+
+					.micon {
+						width: 32upx;
+						height: 28upx;
+					}
+
+					.love-count {
+						padding-left: 10upx;
+						color: #757474;
+					}
+				}
+			}
+		}
+	}
+
+	// 轮播页面 资讯
+	.sns-news {
+		background-color: #fff;
+		width: 750upx;
+
+		.one-new {
+			width: 700upx;
+			height: 74px;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: space-around;
+			align-items: flex-start;
+			align-content: center;
+			padding-bottom: 10px;
+			padding-top: 10px;
+			padding-left: 25upx;
+			padding-right: 25upx;
+			border-bottom: 1px solid #f1f1f1;
+
+			.left {
+				width: 490upx;
+				height: 140upx;
+				text-align: left;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: flex-start;
+
+				.title {
+					font-size: 30upx;
+					line-height: 42upx;
+					color: #001432;
+					margin-top: 21upx;
+				}
+
+				.uinfo {
+					width: 490upx;
+					display: flex;
+					flex-direction: row;
+					flex-wrap: nowrap;
+					justify-content: space-between;
+					align-items: center;
+					align-content: center;
+					margin-top: 6upx;
+					font-size: 20upx;
+					color: #999;
+
+					.utime {
+						font-size: 24upx;
+
+						.name {
+							max-width: 120upx;
+							color: #777;
+						}
+					}
+				}
+			}
+
+			.right {
+				width: 120upx;
+
+				.pic {
+					width: 120upx;
+					height: 120upx;
+					margin-top: 20upx;
+					border-radius: 6upx;
 				}
 			}
 		}
