@@ -22,6 +22,9 @@ Vue.use(httpInterceptor, app)
 import httpApi from '@/common/http.api.js'
 Vue.use(httpApi, app)
 
+import uniNavBar from "@/components/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.vue"
+Vue.component('uni-nav-bar', uniNavBar)
+
 app.$mount()
 // #endif
 
