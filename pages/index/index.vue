@@ -1,36 +1,47 @@
 <template>
 	<view class="index-container">
-		<!-- 首页顶部导航 -->
-		<swiper 
-			class="index-swiper"
-			:autoplay="true" 
-			:interval="3000" 
-			:duration="1000" 
-			:circular="true">
-			<swiper-item 
-				class="swiper-item"
-				v-for="item in adList"
-				:key="item.id">
-				<navigator 
-					:url=" item.data.link + encodeURI('http://www.baidu.com')">
-					<image 
-						class="item-img"
-						:src="item.data.image"
-						mode="aspectFit"></image>
-				</navigator>
-			</swiper-item>
-		</swiper>
-		<!-- 首页导航切换 -->
-		<view class="tag-nav-wrapper">
-			<navigator class="tab-item" url="../feeds/feeds" open-type="switchTab">
-				<image src="../../static/coffee.png" mode="aspectFit"></image>
-				<text class="tag-name">精彩动态</text>
-			</navigator>
-			<navigator class="tab-item" url="../me/me" open-type="switchTab">
-				<image src="../../static/ran.png" mode="aspectFit"></image>
-				<text class="tag-name">个人中心</text>
-			</navigator>
+		<view class="header-box">
+			<!-- 顶部广告位轮播图 -->
+			<swiper 
+				class="swiper" 
+				:indicator-dots="false" 
+				:autoplay="true" 
+				:interval="2500" 
+				:duration="500">
+				<swiper-item v-for="item in swiperAdList" :key="item.id">
+					<navigator open-type="navigate" :url=" '/pages/webview/webview?url='+item.link">
+						<image class="banner-swiper-img" :src="item.image" mode="aspectFill" />
+					</navigator>
+				</swiper-item>
+			</swiper>
+			<!-- 遮罩使用弧形框 -->
+			<image class="crile" src="@/static/crile.png" mode="aspectFill" />
+			
+			<!-- 两个选项按钮 -->
+			<view class="card-header">
+				<view class="card-one card-left" @tap="gotoFeeds('/pages/feeds/feeds')">
+					<image class="img" src="@/static/coffee.png" mode="aspectFill" />
+					<view class="iright">
+						<view class="title">精彩动态</view>
+					</view>
+				</view>
+				<view class="card-one card-right" @tap="gotoFeeds('/pages/me/me')">
+					<image class="img" src="@/static/ran.png" mode="aspectFill" />
+					<view class="iright">
+						<view class="title">个人中心</view>
+					</view>
+				</view>
+			</view>
+
+			<!-- Tab 选项卡 -->
+			<view class="tabs-box">
+				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
+				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
+			</view>
 		</view>
+
+		
+		
 	</view>
 </template>
 
@@ -38,61 +49,188 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello',
-				adList: []
+				// navBar 显示状态控制
+				navBarShowTag: false,
+				// 顶部 轮播图列表
+				swiperAdList: [],
+				// 动态列表数据
+				feedsList: [],
+				// 资讯列表数据
+				newsList: [],
+				// 当前 推荐 资讯 滑动位置
+				currentSwiperIndex: 0,
+				// 滑动页面轮播器的高度
+				swiperSliderHeight: '500px',
+				swiperSliderFeedsHeight: 0,
+				swiperSliderNewsHeight: 0,
+				// 记录滚动所在的位置
+				oldFeedsScrollTop: 0,
+				oldNewsScrollTop: 0
 			}
 		},
 		onLoad() {
 			this.getAdverts()
 		},
 		methods: {
+			gotoFeeds(url) {
+				uni.switchTab({
+					url
+				})
+			},
 			async getAdverts() {
-				const res = await this.$u.api.getAdvert({
+				let adverts = await this.$u.api.getAdvert({
 					space: '1,2,3'
 				})
-				
-				// console.log('index', res)
-				
-				this.adList = res
-			}
+				// console.log(adverts)
+				this.swiperAdList = adverts.map(item => {
+					return {
+						id: item.id,
+						link: item.data.link,
+						image: item.data.image
+					}
+				})
+			},
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-	.index-swiper {
-		width: 100%;
-
-		.swiper-item {
-			width: 100%;
-
-			.item-img {
-				width: 100%;
+	
+	// 推荐、咨询 按钮样式
+		.tabs-box {
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			width: 750upx;
+	
+			.one-nav {
+				width: 120upx;
+				color: #9B9B9B;
+				font-size: 36upx;
+				text-align: center;
+				font-weight: blod;
+	
+				&.nav-actived {
+					color: #0050FF;
+				}
 			}
 		}
-	}
+	
 
-	.tag-nav-wrapper {
-		display: flex;
-		justify-content: space-around;
+	.header-box {
+		position: relative;
+		left: 0;
+		height: 500upx;
+		background-color: #f1f1f1;
+		z-index: 1;
 
-		.tab-item {
-			display: flex;
-			align-items: center;
-			position: relative;
-			padding: 6px 30px;
-			margin-top: -20px;
-			border: 1px solid #808080;
-			background-color: #fff;
-			border-radius: 20px;
+		// 广告位轮播器相关样式
+		.swiper {
+			width: 750upx;
+			height: 400upx;
+			position: absolute;
+			left: 0;
+			top: 0;
+			text-align: center;
+			z-index: 1;
 
-			image {
-				width: 33px;
-				height: 33px;
+			.banner-swiper-img {
+				width: 750upx;
+				height: 400upx;
+				box-shadow: 0 0 2px 0 rgb(188, 188, 188);
 			}
+		}
 
-			text {
-				margin-left: 10px;
+		.crile {
+			width: 750upx;
+			height: 50upx;
+			position: absolute;
+			left: 0;
+			top: 355upx;
+			z-index: 9;
+		}
+		// 新鲜事 活动墙 按钮样式
+		.card-header {
+			position: absolute;
+			left: 0;
+			top: 320upx;
+			height: 160upx;
+			z-index: 99;
+			width: 710upx;
+			margin-left: 20upx;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			align-content: center;
+
+			.card-one {
+				width: 328upx;
+				height: 96upx;
+				border-radius: 49upx;
+				background-color: #fff;
+				margin: 0 10upx;
+				box-shadow: 0 0 2px 0 rgb(188, 188, 188);
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+				align-items: center;
+				align-content: center;
+
+				.img {
+					width: 44upx;
+					height: 44upx;
+					margin-left: 50upx;
+				}
+
+				.iright {
+					margin-left: 30upx;
+					text-align: left;
+					color: #888;
+
+					.title {
+						font-size: 30upx;
+						color: #001432;
+					}
+
+					.iview {
+						display: flex;
+						flex-direction: row;
+						flex-wrap: wrap;
+						justify-content: space-between;
+						align-items: center;
+						align-content: center;
+						font-size: 20upx;
+						margin-top: -5upx;
+					}
+				}
+			}
+		}
+
+		// 推荐、咨询 按钮样式
+		.tabs-box {
+			width: 750upx;
+			position: absolute;
+			z-index: 1;
+			left: 0;
+			top: 480upx;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+
+			.one-nav {
+				height: 80upx;
+				width: 110upx;
+				color: #9B9B9B;
+				font-size: 36upx;
+				text-align: center;
+				font-weight: blod;
+
+				&.nav-actived {
+					color: #0050FF;
+				}
 			}
 		}
 	}
