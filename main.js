@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import App from './App'
 import uView from 'uview-ui'
-
 Vue.use(uView);
+
+import uniNavBar from '@/components/uni-nav-bar/index.vue'
+Vue.use(uniNavBar)
+
 // #ifndef VUE3
 Vue.config.productionTip = false
 App.mpType = 'app'

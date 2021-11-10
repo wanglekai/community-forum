@@ -1,6 +1,14 @@
 <template>
 	<view class="index-container">
 		
+		<!-- 顶部导航 -->
+		<uni-nav-bar v-if="navBarShowTag">
+			<view class="tabs-box">
+				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
+				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
+			</view>
+		</uni-nav-bar>
+		
 		<view class="header-box">
 			<!-- 顶部广告位轮播图 -->
 			<swiper 
