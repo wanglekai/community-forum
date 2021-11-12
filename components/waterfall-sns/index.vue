@@ -164,6 +164,7 @@
 		@include vue-flex;
 		flex-direction: row;
 		align-items: flex-start;
+		background-color: #f3f3f3;
 	}
 
 	.u-column {

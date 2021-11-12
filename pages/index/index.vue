@@ -46,96 +46,87 @@
 			<view class="tabs-box">
 				<view 
 					class="one-nav" 
-					:class="currentSwiperIndex === 0 ? 'nav-actived' : '' " 
-					@tap="swiperChange(0)">推荐</view>
+					:class="!isOn ? 'nav-actived' : '' " 
+					@tap="toggleTag(0)">推荐</view>
 				<view 
 					class="one-nav" 
-					:class="currentSwiperIndex === 1 ? 'nav-actived' : '' " 
-					@tap="swiperChange(1)">资讯</view>
+					:class="isOn ? 'nav-actived' : '' " 
+					@tap="toggleTag(1)">资讯</view>
 			</view>
 		</view>
 
-		
-		<!-- 内容轮播导航实现 -->
-		<swiper 
-			class="swiper-box" 
-			:style=" 'height:'+ swiperSliderHeight " 
-			:current="currentSwiperIndex" 
-			@animationfinish="swiperSlider">
-			<!-- 推荐动态实现 -->
-			<swiper-item class="swiper-item">
-				<view class="page-item sns-now">
-					<view class="feeds-box">
-						<waterfall-sns v-model="feedsList" :addTime="200" ref="waterfall">
-							<template v-slot:left="{leftList}">
-								<view class="feed-one" v-for="(item, index) in leftList" :key="index">
-									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
-										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
-										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
-										<view class="feed-info">
-											<view class="iview">
-												<image class="avatar" :src=" item.avatar" />
-												<text class="name u-line-1">{{ item.name }}</text>
-											</view>
-											<view class="iview">
-												<view class="ilike" @tap.stop="clickLove(item)">
-													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
-													<image v-else src="@/static/love.png" class="micon" />
-													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
-												</view>
-											</view>
+		<view class="content-wrapper" :class="{on: isOn}">
+			<!-- 推荐列表 -->
+			<view class="feeds-box">
+				<waterfall-sns v-model="feedsList" :addTime="200" ref="waterfall">
+					<template v-slot:left="{leftList}">
+						<view class="demo-warter" v-for="(item, index) in leftList" :key="index">
+							<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+								<!-- <image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" /> -->
+								<u-lazy-load threshold="-450" border-radius="10" :image="item.cover" :index="index"></u-lazy-load>
+								<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+								<view class="feed-info">
+									<view class="iview">
+										<image class="avatar" :src=" item.avatar" />
+										<text class="name u-line-1">{{ item.name }}</text>
+									</view>
+									<view class="iview">
+										<view class="ilike" @tap.stop="clickLove(item)">
+											<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+											<image v-else src="@/static/love.png" class="micon" />
+											<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
 										</view>
-									</navigator>
-								</view>
-							</template>
-							<template v-slot:right="{rightList}">
-								<view class="feed-one" v-for="(item, index) in rightList" :key="index">
-									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
-										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
-										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
-										<view class="feed-info">
-											<view class="iview">
-												<image class="avatar" :src=" item.avatar" />
-												<text class="name u-line-1">{{ item.name }}</text>
-											</view>
-											<view class="iview">
-												<view class="ilike" @tap.stop="clickLove(item)">
-													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
-													<image v-else src="@/static/love.png" class="micon" />
-													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
-												</view>
-											</view>
-										</view>
-									</navigator>
-								</view>
-							</template>
-						</waterfall-sns>
-					</view>
-				</view>
-			</swiper-item>
-			<!-- 资讯列表实现 -->
-			<swiper-item class="swiper-item sns-news">
-				<view v-for="(item, index) in newsList" :key="index">
-					<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
-						<view class="left">
-							<view class="title u-line-2">{{item.title}}</view>
-							<view class="uinfo">
-								<view class="iview">
-									<view class="utime">
-										<text class="name">{{ item.author }}</text>
 									</view>
 								</view>
-								<text class="uptime">{{ item.created_at  }}发布</text>
+							</navigator>
+						</view>
+					</template>
+					<template v-slot:right="{rightList}">
+						<view class="demo-warter" v-for="(item, index) in rightList" :key="index">
+							<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+								<!-- <image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" /> -->
+								<u-lazy-load threshold="-450" border-radius="10" :image="item.cover" :index="index"></u-lazy-load>
+								<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+								<view class="feed-info">
+									<view class="iview">
+										<image class="avatar" :src=" item.avatar" />
+										<text class="name u-line-1">{{ item.name }}</text>
+									</view>
+									<view class="iview">
+										<view class="ilike" @tap.stop="clickLove(item)">
+											<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+											<image v-else src="@/static/love.png" class="micon" />
+											<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+										</view>
+									</view>
+								</view>
+							</navigator>
+						</view>
+					</template>
+				</waterfall-sns>
+			</view>
+			
+			<!-- 资讯列表 -->
+			<view class="sns-news" v-for="(item, index) in newsList" :key="index">
+				<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
+					<view class="left">
+						<view class="title u-line-2">{{item.title}}</view>
+						<view class="uinfo">
+							<view class="iview">
+								<view class="utime">
+									<text class="name">{{ item.author }}</text>
+								</view>
 							</view>
+							<text class="uptime">{{ item.created_at  }}发布</text>
 						</view>
-						<view class="right">
-							<image class="pic" mode="aspectFill" :src="item.cover" />
-						</view>
-					</navigator>
-				</view>
-			</swiper-item>
-
-		</swiper>
+					</view>
+					<view class="right">
+						<image class="pic" mode="aspectFill" :src="item.cover" />
+					</view>
+				</navigator>
+			</view>
+		</view>
+		
 		
 	</view>
 </template>
@@ -165,7 +156,8 @@
 				swiperSliderNewsHeight: 0,
 				// 记录滚动所在的位置
 				oldFeedsScrollTop: 0,
-				oldNewsScrollTop: 0
+				oldNewsScrollTop: 0,
+				isOn: false
 			}
 		},
 		onLoad() {
@@ -271,6 +263,13 @@
 				uni.switchTab({
 					url
 				})
+			},
+			toggleTag (i) {
+				if (i === 1) {
+					this.isOn = true
+				} else {
+					this.isOn = false
+				}
 			}
 		}
 	}
@@ -425,100 +424,31 @@
 		background-color: #f1f1f1;
 		padding: 60upx 0 40upx;
 	}
-
-	.sns-now {
-
-		// 动态相关瀑布流样式
-		.feeds-box {
-			width: 735upx;
-			margin-left: 13upx;
-			padding-bottom: 20upx;
-
-			.feed-one {
-				width: 358upx;
-				margin-bottom: 12upx;
-				background-color: #FFF;
-				border-radius: 20upx;
-
-				position: relative;
-
-				.feed-img {
-					width: 358upx;
-					height: 300upx;
-					border-radius: 10upx;
-				}
-
-				.feed-title {
-					width: 350upx;
-					margin-top: 15upx;
-					margin-left: 10upx;
-					font-size: 28upx;
-					line-height: 40upx;
-					color: #001432;
-					text-align: left;
-				}
-
-				.feed-info {
-					display: flex;
-					flex-direction: row;
-					flex-wrap: nowrap;
-					justify-content: space-between;
-					align-items: center;
-					align-content: center;
-					margin-top: 10upx;
-					font-size: 20upx;
-					color: #666;
-					padding: 0 10upx 16upx;
-
-					.iview {
-						display: flex;
-						flex-direction: row;
-						flex-wrap: nowrap;
-						justify-content: space-between;
-						align-items: center;
-						align-content: center;
-
-						.ilike {
-							display: flex;
-							flex-direction: row;
-							flex-wrap: nowrap;
-							justify-content: space-between;
-							align-items: center;
-							align-content: center;
-							height: 60upx;
-							padding: 0 10upx;
-							background-color: #FFFFFF;
-						}
-					}
-
-					.avatar {
-						margin-right: 10upx;
-						height: 40upx;
-						width: 40upx;
-						border-radius: 50%;
-						border: 1upx solid #eee;
-					}
-
-					.name {
-						max-width: 120upx;
-						color: #757474;
-					}
-
-					.micon {
-						width: 32upx;
-						height: 28upx;
-					}
-
-					.love-count {
-						padding-left: 10upx;
-						color: #757474;
-					}
-				}
-			}
+	
+	.content-wrapper {
+		position: relative;
+		width: 1500upx;
+		overflow: hidden;
+		transition: .3s ease-in;
+		left: 0;
+		
+		&.on {
+			left: -100%;
 		}
+		
+		.feeds-box {
+			float: left;
+			width: 50%;
+		}
+		
+		.sns-news {
+			float: right;
+			width: 50%;
+		}
+		
 	}
 
-	// 轮播页面 资讯
+	// 资讯列表
 	.sns-news {
 		background-color: #fff;
 		width: 750upx;
@@ -589,4 +519,84 @@
 			}
 		}
 	}
+
+	.demo-warter {
+		border-radius: 8px;
+		margin: 5px;
+		background-color: #ffffff;
+		padding: 8px;
+		position: relative;
+	}
+	
+	.u-close {
+		position: absolute;
+		top: 32rpx;
+		right: 32rpx;
+	}
+	
+	.demo-image {
+		width: 100%;
+		border-radius: 4px;
+	}
+	
+	.demo-title {
+		font-size: 30rpx;
+		margin-top: 5px;
+		color: $u-main-color;
+	}
+	
+	.demo-tag {
+		display: flex;
+		margin-top: 5px;
+	}
+	
+	.demo-tag-owner {
+		background-color: $u-type-error;
+		color: #FFFFFF;
+		display: flex;
+		align-items: center;
+		padding: 4rpx 14rpx;
+		border-radius: 50rpx;
+		font-size: 20rpx;
+		line-height: 1;
+	}
+	
+	.demo-tag-text {
+		border: 1px solid $u-type-primary;
+		color: $u-type-primary;
+		margin-left: 10px;
+		border-radius: 50rpx;
+		line-height: 1;
+		padding: 4rpx 14rpx;
+		display: flex;
+		align-items: center;
+		border-radius: 50rpx;
+		font-size: 20rpx;
+	}
+	
+	.demo-price {
+		font-size: 30rpx;
+		color: $u-type-error;
+		margin-top: 5px;
+	}
+	
+	.demo-shop {
+		font-size: 22rpx;
+		color: $u-tips-color;
+		margin-top: 5px;
+	}
+	
+	// .avatar 
+	
+	.feed-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.avatar, .micon {
+		width: 40upx;
+		height: 40upx;
+	}
+
 </style>
