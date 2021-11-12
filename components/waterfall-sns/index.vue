@@ -25,7 +25,7 @@
 			// 单位ms
 			addTime: {
 				type: [Number, String],
-				default: 200
+				default: 0
 			},
 			// id值，用于清除某一条数据时，根据此idKey名称找到并移除，如数据为{idx: 22, name: 'lisa'}
 			// 那么该把idKey设置为idx
@@ -91,7 +91,7 @@
 					this.splitData();
 				} else {
 					// 在这里模拟触发 我们定义的全局事件 实现数据通信的目的
-					let height = (leftRect.height > rightRect.height ? leftRect.height : rightRect.height) 
+					let height = (leftRect.height > rightRect.height ? leftRect.height : rightRect.height) + 120
 					uni.$emit('swiperHeightChange', height + 'px')
 				}
 			},
@@ -170,7 +170,7 @@
 		@include vue-flex;
 		flex: 1;
 		flex-direction: column;
-		height: auto;
+		overflow: hidden;
 	}
 
 	.u-image {
