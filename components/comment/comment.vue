@@ -129,16 +129,18 @@
 			async getCommentsList() {
 				if (this.type === "feed") {
 					// 获取当前动态评论列表信息
-					let res = await this.$u.api.getFeedComments({
+					let { data } = await this.$u.api.getFeedComments({
 						id: this.oneInfo.id
 					});
-					this.commintsList = res.comments;
+					// console.log(res)
+					this.commintsList = data.comments;
 				} else {
 					// 获取当前资讯评论列表信息
-					let res = await this.$u.api.getNewComments({
+					let { data } = await this.$u.api.getNewComments({
 						id: this.oneInfo.id
 					});
-					this.commintsList = res.comments;
+					// console.log(res)
+					this.commintsList = data.comments;
 				}
 			},
 			// 点赞逻辑操作

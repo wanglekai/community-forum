@@ -55,7 +55,8 @@
 					// 设置状态
 					this.canRequestFeeds = "no"
 					let res = await this.$u.api.getFeeds()
-					let feeds = res.feeds.map(item => {
+					// console.log(res)
+					let feeds = res.data.feeds.map(item => {
 						return {
 							id: item.id,
 							cover: this.BaseFileURL + item.images[0].file

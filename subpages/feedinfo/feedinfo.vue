@@ -45,14 +45,15 @@
 			})
 			// #endif
 			// 获取动态详情
-			let res = await this.$u.api.getFeedInfo(params)
-			let images = res.images.map(one => {
+			let { data } = await this.$u.api.getFeedInfo(params)
+			// console.log(res)
+			let images = data.images.map(one => {
 				return this.BaseFileURL + one.file
 			})
 			this.feedInfo = {
-				...res,
-				name: res.user.name,
-				avatar: res.user.avatar ? res.user.avatar.url : '/static/nopic.png',
+				...data,
+				name: data.user.name,
+				avatar: data.user.avatar ? data.user.avatar.url : '/static/nopic.png',
 				images,
 			}
 			this.getRequestOK = true

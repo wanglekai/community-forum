@@ -183,7 +183,10 @@
 				let adverts = await this.$u.api.getAdvert({
 					space: '1,2,3'
 				})
-				this.swiperAdList = adverts.map(item => {
+				
+				// console.log(adverts)
+				
+				this.swiperAdList = adverts.data.map(item => {
 					return {
 						id: item.id,
 						link: item.data.link,
@@ -195,7 +198,7 @@
 			async getFeedsList() {
 				let feeds = await this.$u.api.getFeeds()
 				// console.log(feeds)
-				let feedList = feeds.feeds.map(item => {
+				let feedList = feeds.data.feeds.map(item => {
 					return {
 						...item,
 						cover: this.BaseFileURL + item.images[0].file,
@@ -214,7 +217,7 @@
 			// 请求资讯列表数据
 			async getNewsList() {
 				let news = await this.$u.api.getNews()
-				let newsList = news.map(item => {
+				let newsList = news.data.map(item => {
 					return {
 						...item,
 						cover: this.BaseFileURL + item.image.id

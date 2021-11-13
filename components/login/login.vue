@@ -65,10 +65,10 @@
 </template>
 
 <script>
-	// import {
-	// 	mapState,
-	// 	mapActions
-	// } from 'vuex'
+	import {
+		mapState,
+		mapActions
+	} from 'vuex'
 
 	export default {
 		data() {
@@ -130,6 +130,7 @@
 								// 只有在 电话、邮箱注册的时候才会触发该校验规则
 								if (this.loginType === 'phone' || this.loginType === 'email') {
 									let res = await this.$u.api.findUser({ name: value })
+									console.log(res)
 									if (!!value && res.statusCode === 200) {
 										callback(new Error('当前用户昵称已存在'))
 									} else {
@@ -261,9 +262,9 @@
 				}
 			}
 		},
-		// computed: {
-		// 	...mapState(['loginState', 'userInfo'])
-		// },
+		computed: {
+			...mapState(['loginState', 'userInfo'])
+		},
 		// 必须要在onReady生命周期设置校验规则，因为onLoad生命周期组件可能尚未创建完毕
 		onReady() {
 			this.$refs.uForm.setRules(this.rules);
@@ -284,6 +285,7 @@
 					if (res.authSetting["scope.userInfo"]) {
 						uni.getUserInfo({
 							success: res => {
+								console.log(res)
 								// 如果用户授权了，则做两件事，第一件事
 								this.form.login = res.userInfo.nickName
 								this.form.name = res.userInfo.nickName
@@ -301,7 +303,7 @@
 			
 		},
 		methods: {
-			// ...mapActions(['userLoginAction', 'userLogoutAction']),
+			...mapActions(['userLoginAction', 'userLogoutAction']),
 			// 关闭弹窗
 			closeLogin() {
 				this.show = false
@@ -333,10 +335,11 @@
 			},
 			// 获取验证码
 			async getCode() {
-				let pcode = await this.$u.api.getLoginCode({
+				let pcode = await this.$u.api.getRegisterCode({
 					phone: this.form.phone
 				})
-				if (!!pcode.data.message && pcode.data.message[0] === "获取成功") {
+				console.log(pcode)
+				if (!!pcode.message && pcode.message[0] === "获取成功") {
 					uni.showModal({
 						title: '验证码获取成功',
 						content: '8888'
@@ -344,7 +347,7 @@
 				} else {
 					uni.showModal({
 						title: '验证码获取失败',
-						content: pcode.data.errors.phone[0]
+						content: pcode.errors.phone[0]
 					})
 				}
 			},
@@ -362,6 +365,7 @@
 			},
 			// 提交表单验证
 			submit() {
+				console.log(this.loginType)
 				this.$refs.uForm.validate(async valid => {
 					if (!valid) {
 						uni.showToast({
@@ -376,13 +380,14 @@
 								login: this.form.login,
 								password: this.form.password,
 							})
-							if (resa.statusCode === 200) {
+							console.log(resa)
+							if (resa.access_token) {
 								// 登陆成功
-								this.loginAfter(resa.data.access_token)
+								this.loginAfter(resa.access_token)
 							} else {
 								uni.showModal({
 									title: '登陆失败',
-									content: resa.data.message
+									content: resa.message
 								})
 							}
 							break;
@@ -391,13 +396,13 @@
 								login: this.form.phone,
 								verifiable_code: '8888'
 							})
-							if (resaa.statusCode === 200) {
+							if (resaa.access_token) {
 								// 登陆成功
-								this.loginAfter(resaa.data.access_token)
+								this.loginAfter(resaa.access_token)
 							} else {
 								uni.showModal({
 									title: '登陆失败',
-									content: resaa.data.message
+									content: resaa.message
 								})
 							}
 							break;
@@ -416,11 +421,11 @@
 							})
 							if (resb.statusCode === 201) {
 								// 登陆成功
-								this.loginAfter(resb.data.token)
+								this.loginAfter(resb.token)
 							} else {
 								uni.showModal({
 									title: '登陆失败',
-									content: resb.data.message
+									content: resb.message
 								})
 							}
 							break;
@@ -440,11 +445,11 @@
 							console.log(resc)
 							if (resc.statusCode === 201) {
 								// 登陆成功
-								this.loginAfter(resc.data.token)
+								this.loginAfter(resc.token)
 							} else {
 								uni.showModal({
 									title: '登陆失败',
-									content: resc.data.message
+									content: resc.message
 								})
 							}
 							break;
@@ -460,11 +465,13 @@
 			},
 			// 注册、登陆成功后设置相关逻辑
 			async loginAfter(token) {
+				console.log(token)
 				this.show = false
 				uni.setStorageSync('token', token)
 
 				// 获取未读消息提示
 				let res = await this.$u.api.getUserMsg()
+				console.log(res)
 				let name = this.form.name
 				if (this.loginType === 'login') {
 					name = this.form.login
@@ -472,12 +479,12 @@
 				let loginInfo = {
 					name,
 					avatar: this.form.avatar,
-					liked: res.data.user.liked,
-					commented: res.data.user.commented
+					liked: res.user.liked,
+					commented: res.user.commented
 				}
-				// this.userLoginAction(loginInfo)
-				// uni.$emit('meUserLogin')
-				// uni.$emit('indexUserLogin')
+				this.userLoginAction(loginInfo)
+				uni.$emit('meUserLogin')
+				uni.$emit('indexUserLogin')
 			},
 			// 更改 登陆 注册 方式选择
 			sectionChange(index) {

@@ -9,11 +9,14 @@ Vue.use(uniNavBar)
 import login from '@/components/login/login.vue'
 Vue.use('login', login)
 
+import store from '@/store/index.js'
+
 // #ifndef VUE3
 Vue.config.productionTip = false
 App.mpType = 'app'
 const app = new Vue({
-    ...App
+    ...App,
+	store
 })
 Vue.prototype.BaseFileURL = 'http://ts.lagou.uieee.com/api/v2/files/'
 

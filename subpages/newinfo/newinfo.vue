@@ -85,23 +85,23 @@
 				menus: ['shareAppMessage', 'shareTimeline']
 			})
 			// #endif
-			let res = await this.$u.api.getNewInfo(options);
+			let { data } = await this.$u.api.getNewInfo(options);
 			// res = res.data
 			
 			// console.log(res)
 			
 			// let cp = res.content.replace(/@!\[(\d*).jpg\]\((\d*)\)/g,"<img src='" +this.BaseFileURL +'$2' + "' />")
-			let cp = res.content.replace(/@!\[.*\]\((\d*)\)/g, "<img src='" + this.BaseFileURL + '$1' + "' />")
+			let cp = data.content.replace(/@!\[.*\]\((\d*)\)/g, "<img src='" + this.BaseFileURL + '$1' + "' />")
 			// 匹配检索换行符号，实现换行目标
 			cp = cp.replace(/\s\D\s/g, "<p></p>")
 			
 			this.newInfo = {
-				...res,
-				cutTitle: res.title.length > 11 ? res.title.substring(0, 11) + "..." : res.title,
-				cover: this.BaseFileURL + res.image.id,
-				userId: res.user_id,
+				...data,
+				cutTitle: data.title.length > 11 ? data.title.substring(0, 11) + "..." : data.title,
+				cover: this.BaseFileURL + data.image.id,
+				userId: data.user_id,
 				content: cp,
-				views_count: res.hits
+				views_count: data.hits
 			}
 			this.getRequestOK = true;
 		},
