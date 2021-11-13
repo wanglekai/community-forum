@@ -1,6 +1,6 @@
 <template>
-	<view class="index-container">
-		
+	<view id="index">
+
 		<!-- 顶部导航 -->
 		<uni-nav-bar v-if="navBarShowTag">
 			<view class="tabs-box">
@@ -8,15 +8,11 @@
 				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
 			</view>
 		</uni-nav-bar>
-		
+
+		<!-- 页面 header 相关部分 -->
 		<view class="header-box">
 			<!-- 顶部广告位轮播图 -->
-			<swiper 
-				class="swiper" 
-				:indicator-dots="false" 
-				:autoplay="true" 
-				:interval="2500" 
-				:duration="500">
+			<swiper class="swiper" :indicator-dots="false" :autoplay="true" :interval="2500" :duration="500">
 				<swiper-item v-for="item in swiperAdList" :key="item.id">
 					<navigator open-type="navigate" :url=" '/pages/webview/webview?url='+item.link">
 						<image class="banner-swiper-img" :src="item.image" mode="aspectFill" />
@@ -25,7 +21,6 @@
 			</swiper>
 			<!-- 遮罩使用弧形框 -->
 			<image class="crile" src="@/static/crile.png" mode="aspectFill" />
-			
 			<!-- 两个选项按钮 -->
 			<view class="card-header">
 				<view class="card-one card-left" @tap="gotoFeeds('/pages/feeds/feeds')">
@@ -44,100 +39,110 @@
 
 			<!-- Tab 选项卡 -->
 			<view class="tabs-box">
-				<view 
-					class="one-nav" 
-					:class="!isOn ? 'nav-actived' : '' " 
-					@tap="toggleTag(0)">推荐</view>
-				<view 
-					class="one-nav" 
-					:class="isOn ? 'nav-actived' : '' " 
-					@tap="toggleTag(1)">资讯</view>
+				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
+				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
 			</view>
+
 		</view>
 
-		<view class="content-wrapper" :class="{on: isOn}">
-			<!-- 推荐列表 -->
-			<view class="feeds-box">
-				<waterfall-sns v-model="feedsList" :addTime="200" ref="waterfall">
-					<template v-slot:left="{leftList}">
-						<view class="demo-warter" v-for="(item, index) in leftList" :key="index">
-							<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
-								<!-- <image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" /> -->
-								<u-lazy-load threshold="-450" border-radius="10" :image="item.cover" :index="index"></u-lazy-load>
-								<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
-								<view class="feed-info">
-									<view class="iview">
-										<image class="avatar" :src=" item.avatar" />
-										<text class="name u-line-1">{{ item.name }}</text>
-									</view>
-									<view class="iview">
-										<view class="ilike" @tap.stop="clickLove(item)">
-											<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
-											<image v-else src="@/static/love.png" class="micon" />
-											<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+		<!-- 内容轮播导航实现 -->
+		<swiper class="swiper-box" :style=" 'height:'+ swiperSliderHeight " :current="currentSwiperIndex" @animationfinish="swiperSlider">
+			<!-- 推荐动态实现 -->
+			<swiper-item class="swiper-item">
+				<view class="page-item sns-now">
+					<view class="feeds-box">
+						<waterfall-sns v-model="feedsList" ref="waterfall">
+							<template v-slot:left="{leftList}">
+								<view class="feed-one" v-for="(item, index) in leftList" :key="index">
+									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+										<view class="feed-info">
+											<view class="iview">
+												<image class="avatar" :src=" item.avatar" />
+												<text class="name u-line-1">{{ item.name }}</text>
+											</view>
+											<view class="iview">
+												<view class="ilike" @tap.stop="clickLove(item)">
+													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+													<image v-else src="@/static/love.png" class="micon" />
+													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+												</view>
+											</view>
 										</view>
-									</view>
+									</navigator>
 								</view>
-							</navigator>
-						</view>
-					</template>
-					<template v-slot:right="{rightList}">
-						<view class="demo-warter" v-for="(item, index) in rightList" :key="index">
-							<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
-								<!-- <image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" /> -->
-								<u-lazy-load threshold="-450" border-radius="10" :image="item.cover" :index="index"></u-lazy-load>
-								<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
-								<view class="feed-info">
-									<view class="iview">
-										<image class="avatar" :src=" item.avatar" />
-										<text class="name u-line-1">{{ item.name }}</text>
-									</view>
-									<view class="iview">
-										<view class="ilike" @tap.stop="clickLove(item)">
-											<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
-											<image v-else src="@/static/love.png" class="micon" />
-											<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+							</template>
+							<template v-slot:right="{rightList}">
+								<view class="feed-one" v-for="(item, index) in rightList" :key="index">
+									<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+										<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+										<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+										<view class="feed-info">
+											<view class="iview">
+												<image class="avatar" :src=" item.avatar" />
+												<text class="name u-line-1">{{ item.name }}</text>
+											</view>
+											<view class="iview">
+												<view class="ilike" @tap.stop="clickLove(item)">
+													<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+													<image v-else src="@/static/love.png" class="micon" />
+													<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+												</view>
+											</view>
 										</view>
+									</navigator>
+								</view>
+							</template>
+						</waterfall-sns>
+					</view>
+				</view>
+			</swiper-item>
+			<!-- 资讯列表实现 -->
+			<swiper-item class="swiper-item sns-news">
+				<view v-for="(item, index) in newsList" :key="index">
+					<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
+						<view class="left">
+							<view class="title u-line-2">{{item.title}}</view>
+							<view class="uinfo">
+								<view class="iview">
+									<view class="utime">
+										<text class="name">{{ item.author }}</text>
 									</view>
 								</view>
-							</navigator>
-						</view>
-					</template>
-				</waterfall-sns>
-			</view>
-			
-			<!-- 资讯列表 -->
-			<view class="sns-news" v-for="(item, index) in newsList" :key="index">
-				<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
-					<view class="left">
-						<view class="title u-line-2">{{item.title}}</view>
-						<view class="uinfo">
-							<view class="iview">
-								<view class="utime">
-									<text class="name">{{ item.author }}</text>
-								</view>
+								<text class="uptime">{{ item.created_at | timeFormate }}发布</text>
 							</view>
-							<text class="uptime">{{ item.created_at  }}发布</text>
 						</view>
-					</view>
-					<view class="right">
-						<image class="pic" mode="aspectFill" :src="item.cover" />
-					</view>
-				</navigator>
-			</view>
-		</view>
-		
+						<view class="right">
+							<image class="pic" mode="aspectFill" :src="item.cover" />
+						</view>
+					</navigator>
+				</view>
+			</swiper-item>
+
+		</swiper>
+
+		<!-- 分享按钮组件 -->
+		<goto-share />
+
+		<!-- 登陆组件 -->
 		<login ref="login" />
+
 	</view>
 </template>
 
 <script>
+	import {
+		mapState,
+		mapActions
+	} from 'vuex'
+	// 引入 时间日期格式化显示函数
+	import timeFrom from '@/tools/timeFrom.js'
+	// 引入 个性化 瀑布流组件
 	import WaterfallSns from '@/components/waterfall-sns/index.vue'
-
+	import feedMixin from '@/mixins/todoFeed.js'
 	export default {
-		components: {
-			WaterfallSns
-		},
+		mixins: [feedMixin],
 		data() {
 			return {
 				// navBar 显示状态控制
@@ -156,14 +161,54 @@
 				swiperSliderNewsHeight: 0,
 				// 记录滚动所在的位置
 				oldFeedsScrollTop: 0,
-				oldNewsScrollTop: 0,
-				isOn: false
+				oldNewsScrollTop: 0
 			}
 		},
-		onLoad() {
+		components: {
+			WaterfallSns
+		},
+		computed: {
+			...mapState(['loginState', 'userInfo'])
+		},
+		async onLoad() {
+			
+			uni.$on('indexUserLogin', ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			uni.$on('indexUserLogout', ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			
+			// 发布新的动态后，触发数据更新
+			uni.$on("indexFeedsUpdate", ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			
+			// 个人中心删除一条动态后，触发更新首页数据
+			uni.$on("indexFeedRemove", fid =>{
+				this.$refs.waterfall.remove(fid);
+			})
+			
+			// 用户点赞一条动态后触发数据更新
+			uni.$on('indexFeedLoveChange', item => {
+				this.$refs.waterfall.modify(item.id, "like_count", item.like_count);
+				this.$refs.waterfall.modify(item.id, "has_like", item.has_like);
+			})
+
+			// 我们要在这里初始化请求相关数据
 			this.getAdverts()
 			this.getFeedsList()
 			this.getNewsList()
+
 		},
 		onPageScroll(event) {
 			if (this.currentSwiperIndex === 0) {
@@ -177,15 +222,39 @@
 				this.navBarShowTag = false
 			}
 		},
+		onReachBottom() {
+			console.log('下拉到底啦')
+			// 请求新的数据
+			if (this.currentSwiperIndex === 0) {
+				this.getFeedsList()
+			} else {
+				this.getNewsList()
+			}
+		},
+		onPullDownRefresh() {
+			console.log('顶部下拉刷新')
+			this.feedsList = []
+			this.$refs.waterfall.clear()
+			if (this.currentSwiperIndex === 0) {
+				this.getFeedsList()
+			} else {
+				this.getNewsList()
+			}
+		},
+		filters: {
+			timeFormate(timeDate) {
+				let Time = new Date(timeDate);
+				let timestemp = Time.getTime();
+				let t = timeFrom(timestemp, "yyyy年mm月dd日");
+				return t;
+			}
+		},
 		methods: {
 			// 请求 广告轮播图信息
 			async getAdverts() {
 				let adverts = await this.$u.api.getAdvert({
 					space: '1,2,3'
 				})
-				
-				// console.log(adverts)
-				
 				this.swiperAdList = adverts.data.map(item => {
 					return {
 						id: item.id,
@@ -197,7 +266,6 @@
 			// 请求 feeds 列表数据
 			async getFeedsList() {
 				let feeds = await this.$u.api.getFeeds()
-				// console.log(feeds)
 				let feedList = feeds.data.feeds.map(item => {
 					return {
 						...item,
@@ -225,6 +293,7 @@
 				})
 
 				this.newsList = [...this.newsList, ...newsList]
+				console.log(this.newsList)
 				this.swiperSliderNewsHeight = this.newsList.length * 95 + 100 + 'px'
 				this.swiperSliderHeight = this.swiperSliderNewsHeight
 			},
@@ -266,13 +335,6 @@
 				uni.switchTab({
 					url
 				})
-			},
-			toggleTag (i) {
-				if (i === 1) {
-					this.isOn = true
-				} else {
-					this.isOn = false
-				}
 			}
 		}
 	}
@@ -427,31 +489,100 @@
 		background-color: #f1f1f1;
 		padding: 60upx 0 40upx;
 	}
-	
-	.content-wrapper {
-		position: relative;
-		width: 1500upx;
-		overflow: hidden;
-		transition: .3s ease-in;
-		left: 0;
-		
-		&.on {
-			left: -100%;
-		}
-		
+
+	.sns-now {
+
+		// 动态相关瀑布流样式
 		.feeds-box {
-			float: left;
-			width: 50%;
+			width: 735upx;
+			margin-left: 13upx;
+			padding-bottom: 20upx;
+
+			.feed-one {
+				width: 358upx;
+				margin-bottom: 12upx;
+				background-color: #FFF;
+				border-radius: 20upx;
+
+				position: relative;
+
+				.feed-img {
+					width: 358upx;
+					height: 300upx;
+					border-radius: 10upx;
+				}
+
+				.feed-title {
+					width: 350upx;
+					margin-top: 15upx;
+					margin-left: 10upx;
+					font-size: 28upx;
+					line-height: 40upx;
+					color: #001432;
+					text-align: left;
+				}
+
+				.feed-info {
+					display: flex;
+					flex-direction: row;
+					flex-wrap: nowrap;
+					justify-content: space-between;
+					align-items: center;
+					align-content: center;
+					margin-top: 10upx;
+					font-size: 20upx;
+					color: #666;
+					padding: 0 10upx 16upx;
+
+					.iview {
+						display: flex;
+						flex-direction: row;
+						flex-wrap: nowrap;
+						justify-content: space-between;
+						align-items: center;
+						align-content: center;
+
+						.ilike {
+							display: flex;
+							flex-direction: row;
+							flex-wrap: nowrap;
+							justify-content: space-between;
+							align-items: center;
+							align-content: center;
+							height: 60upx;
+							padding: 0 10upx;
+							background-color: #FFFFFF;
+						}
+					}
+
+					.avatar {
+						margin-right: 10upx;
+						height: 40upx;
+						width: 40upx;
+						border-radius: 50%;
+						border: 1upx solid #eee;
+					}
+
+					.name {
+						max-width: 120upx;
+						color: #757474;
+					}
+
+					.micon {
+						width: 32upx;
+						height: 28upx;
+					}
+
+					.love-count {
+						padding-left: 10upx;
+						color: #757474;
+					}
+				}
+			}
 		}
-		
-		.sns-news {
-			float: right;
-			width: 50%;
-		}
-		
 	}
 
-	// 资讯列表
+	// 轮播页面 资讯
 	.sns-news {
 		background-color: #fff;
 		width: 750upx;
@@ -522,84 +653,4 @@
 			}
 		}
 	}
-
-	.demo-warter {
-		border-radius: 8px;
-		margin: 5px;
-		background-color: #ffffff;
-		padding: 8px;
-		position: relative;
-	}
-	
-	.u-close {
-		position: absolute;
-		top: 32rpx;
-		right: 32rpx;
-	}
-	
-	.demo-image {
-		width: 100%;
-		border-radius: 4px;
-	}
-	
-	.demo-title {
-		font-size: 30rpx;
-		margin-top: 5px;
-		color: $u-main-color;
-	}
-	
-	.demo-tag {
-		display: flex;
-		margin-top: 5px;
-	}
-	
-	.demo-tag-owner {
-		background-color: $u-type-error;
-		color: #FFFFFF;
-		display: flex;
-		align-items: center;
-		padding: 4rpx 14rpx;
-		border-radius: 50rpx;
-		font-size: 20rpx;
-		line-height: 1;
-	}
-	
-	.demo-tag-text {
-		border: 1px solid $u-type-primary;
-		color: $u-type-primary;
-		margin-left: 10px;
-		border-radius: 50rpx;
-		line-height: 1;
-		padding: 4rpx 14rpx;
-		display: flex;
-		align-items: center;
-		border-radius: 50rpx;
-		font-size: 20rpx;
-	}
-	
-	.demo-price {
-		font-size: 30rpx;
-		color: $u-type-error;
-		margin-top: 5px;
-	}
-	
-	.demo-shop {
-		font-size: 22rpx;
-		color: $u-tips-color;
-		margin-top: 5px;
-	}
-	
-	// .avatar 
-	
-	.feed-info {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	
-	.avatar, .micon {
-		width: 40upx;
-		height: 40upx;
-	}
-
 </style>

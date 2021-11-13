@@ -9,6 +9,10 @@ Vue.use(uniNavBar)
 import login from '@/components/login/login.vue'
 Vue.use('login', login)
 
+
+import gotoShare from "@/components/gotoShare/gotoShare.vue";
+Vue.component("goto-share", gotoShare);
+
 import store from '@/store/index.js'
 
 // #ifndef VUE3

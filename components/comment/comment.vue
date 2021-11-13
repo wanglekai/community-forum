@@ -24,7 +24,7 @@
 			<view class="minput" @tap="openComment">说点什么···</view>
 			<view class="mview">
 				<!-- 点赞相关统计 -->
-				<view class="mbtn" @tap="">
+				<view class="mbtn" @tap="sendLove">
 					<image class="micon" v-if="type=='info'" :src=" oneInfoClone.has_like ? '/static/lover.png' : '/static/love.png' "
 					 mode="aspectFit" />
 					<text class="mtext" v-if="type=='info' && oneInfoClone.digg_count>0 ">{{ oneInfoClone.digg_count }}</text>
@@ -86,9 +86,9 @@
 <script>
 	import timeFrom from "@/tools/timeFrom.js";
 	import feedMixin from '@/mixins/todoFeed.js'
-	// import {
-	// 	mapState
-	// } from 'vuex'
+	import {
+		mapState
+	} from 'vuex'
 	
 	export default {
 		mixins: [feedMixin],
@@ -110,9 +110,9 @@
 				disableSendCommentTag: true
 			};
 		},
-		// computed: {
-		// 	...mapState(['loginState', 'userInfo'])
-		// },
+		computed: {
+			...mapState(['loginState', 'userInfo'])
+		},
 		async created() {
 			console.log(this.oneInfo)
 			this.oneInfoClone = this.oneInfo
@@ -218,22 +218,13 @@
 			 },
 			// 发送评论信息
 			async sendComment(){
+				console.log(1)
 				// 发送状态判定
 				if(this.disableSendCommentTag) return 
 				this.disableSendCommentTag = true
 				
-				// #ifdef MP-WEIXIN
-				// 敏感词信息判定
-				let cres = await this.doMsgSecCheck(this.cinput)
-				if(cres.data.Response.EvilTokens.length > 0){
-					uni.showModal({
-						title:'敏感词审核',
-						content: '您发布的评论涉及敏感词：'+ cres.data.Response.EvilTokens[0].EvilKeywords
-					})
-					return
-				}
-				// #endif
-
+				
+				console.log(2)
 				if(this.type === 'feed'){
 					await this.$u.api.commentOneFeed({
 						id: this.oneInfoClone.id,
@@ -249,6 +240,7 @@
 					});
 					++this.oneInfoClone.comment_count
 				}
+				console.log(3)
 				uni.showToast({
 					title: "评论成功",
 					icon: "success",

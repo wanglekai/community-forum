@@ -380,10 +380,10 @@
 								login: this.form.login,
 								password: this.form.password,
 							})
-							console.log(resa)
-							if (resa.access_token) {
+							// console.log(resa)
+							if (resa.statusCode === 200) {
 								// 登陆成功
-								this.loginAfter(resa.access_token)
+								this.loginAfter(resa.data.access_token)
 							} else {
 								uni.showModal({
 									title: '登陆失败',
@@ -479,8 +479,8 @@
 				let loginInfo = {
 					name,
 					avatar: this.form.avatar,
-					liked: res.user.liked,
-					commented: res.user.commented
+					liked: res.data.user.liked,
+					commented: res.data.user.commented
 				}
 				this.userLoginAction(loginInfo)
 				uni.$emit('meUserLogin')
