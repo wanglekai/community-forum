@@ -10,20 +10,20 @@
 			<view class="title" v-if="!!feedInfo.feed_content">{{ feedInfo.feed_content }}</view>
 			<image class="feed-imgs" mode="widthFix" v-for="(image, index) in feedInfo.images" :key="index" :src="image" @tap="previewImage(index)" />
 			<view class="other">
-				<text>{{ feedInfo.created_at  }} 发布</text>
+				<text>{{ feedInfo.created_at | timeFormate }} 发布</text>
 				<text>{{ feedInfo.feed_view_count }} 阅读 {{ feedInfo.like_count }} 点赞</text>
 			</view>
 		</view>
 		<view class="line" />
-		<!-- <comment :oneInfo="feedInfo" type="feed" /> -->
+		<comment :oneInfo="feedInfo" type="feed" />
 	</view>
 </template>
 
 <script>
 	// 引入 时间日期格式化显示函数
-	// import timeFrom from '@/tools/timeFrom.js'
+	import timeFrom from '@/tools/timeFrom.js'
 	// 引入 评论插件
-	// import comment from '@/components/comment/comment.vue'
+	import comment from '@/components/comment/comment.vue'
 	export default {
 		data() {
 			return {
@@ -34,7 +34,7 @@
 			}
 		},
 		components: {
-			// comment
+			comment
 		},
 		async onLoad(params) {
 			// #ifdef MP-WEIXIN
@@ -66,7 +66,15 @@
 					urls: this.feedInfo.images
 				});
 			}
-		}
+		},
+		filters: {
+			timeFormate(timeDate) {
+				let Time = new Date(timeDate);
+				let timestemp = Time.getTime();
+				let t = timeFrom(timestemp, "yyyy年mm月dd日");
+				return t;
+			},
+		},
 	}
 </script>
 

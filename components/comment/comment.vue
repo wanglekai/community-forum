@@ -24,7 +24,7 @@
 			<view class="minput" @tap="openComment">说点什么···</view>
 			<view class="mview">
 				<!-- 点赞相关统计 -->
-				<view class="mbtn" @tap="sendLove">
+				<view class="mbtn" @tap="">
 					<image class="micon" v-if="type=='info'" :src=" oneInfoClone.has_like ? '/static/lover.png' : '/static/love.png' "
 					 mode="aspectFit" />
 					<text class="mtext" v-if="type=='info' && oneInfoClone.digg_count>0 ">{{ oneInfoClone.digg_count }}</text>
@@ -37,7 +37,7 @@
 				</view>
 
 				<!-- 评论相关统计 -->
-				<view class="mbtn" @tap="gotoComment">
+				<view class="mbtn" @tap="">
 					<image class="micon" src="/static/msg.png" mode="aspectFit" />
 					<text class="mtext" v-if="type=='info' && oneInfoClone.comment_count>0 ">{{ oneInfoClone.comment_count }}</text>
 					<text class="mtext" v-if="type=='info' && oneInfoClone.comment_count<=0 ">评论</text>
@@ -78,7 +78,7 @@
 		</view>
 		
 		<!-- 登陆组件 -->
-		<login ref="login"></login>
+		<!-- <login ref="login"></login> -->
 
 	</view>
 </template>
@@ -86,9 +86,9 @@
 <script>
 	import timeFrom from "@/tools/timeFrom.js";
 	import feedMixin from '@/mixins/todoFeed.js'
-	import {
-		mapState
-	} from 'vuex'
+	// import {
+	// 	mapState
+	// } from 'vuex'
 	
 	export default {
 		mixins: [feedMixin],
@@ -110,9 +110,9 @@
 				disableSendCommentTag: true
 			};
 		},
-		computed: {
-			...mapState(['loginState', 'userInfo'])
-		},
+		// computed: {
+		// 	...mapState(['loginState', 'userInfo'])
+		// },
 		async created() {
 			console.log(this.oneInfo)
 			this.oneInfoClone = this.oneInfo
@@ -132,13 +132,13 @@
 					let res = await this.$u.api.getFeedComments({
 						id: this.oneInfo.id
 					});
-					this.commintsList = res.data.comments;
+					this.commintsList = res.comments;
 				} else {
 					// 获取当前资讯评论列表信息
 					let res = await this.$u.api.getNewComments({
 						id: this.oneInfo.id
 					});
-					this.commintsList = res.data.comments;
+					this.commintsList = res.comments;
 				}
 			},
 			// 点赞逻辑操作

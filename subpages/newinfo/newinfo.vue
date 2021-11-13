@@ -22,7 +22,7 @@
 			<view class="mtitle">{{newInfo.title}}</view>
 			<view class="info-user">
 				<view class="info">
-					<text>{{ newInfo.author }} {{ newInfo.created_at  }} 发布 {{ newInfo.views_count }}阅读</text>
+					<text>{{ newInfo.author }} {{ newInfo.created_at | timeFormate }} 发布 {{ newInfo.views_count }}阅读</text>
 				</view>
 			</view>
 		</view>
@@ -35,30 +35,30 @@
 
 		<!-- 作者信息 -->
 		<view class="info-header">
-			<text class="send">{{ newInfo.created_at  }}发布 </text>
+			<text class="send">{{ newInfo.created_at | timeFormate }}发布 </text>
 			<text>{{ newInfo.views_count }}阅读</text>
 		</view>
 
 		<view class="line" />
-		<!-- <comment :oneInfo="newInfo" type="info" /> -->
+		<comment :oneInfo="newInfo" type="info" />
 	</view>
 </template>
 
 <script>
 	// 引入 时间日期格式化显示函数
-	// import timeFrom from '@/tools/timeFrom.js'
+	import timeFrom from '@/tools/timeFrom.js'
 	// 引入富文本解析组件
 	import htmlParse from "@/components/html-parse/parse.vue";
 	// 引入毛玻璃组件
 	import picBlur from "@/components/pic-blur/pic-blur.vue";
 	// 引入 评论插件
-	// import comment from '@/components/comment/comment.vue'
+	import comment from '@/components/comment/comment.vue'
 
 	export default {
 		components: {
 			htmlParse,
-			picBlur
-			// comment
+			picBlur,
+			comment
 		},
 		data() {
 			return {
@@ -112,7 +112,15 @@
 					url: '/pages/index/index'
 				})
 			}
-		}
+		},
+		filters: {
+			timeFormate(timeDate) {
+				let Time = new Date(timeDate);
+				let timestemp = Time.getTime();
+				let t = timeFrom(timestemp, "yyyy年mm月dd日");
+				return t;
+			},
+		},
 	};
 </script>
 <style lang="scss" scoped>
