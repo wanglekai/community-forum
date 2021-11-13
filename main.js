@@ -6,6 +6,9 @@ Vue.use(uView);
 import uniNavBar from '@/components/uni-nav-bar/index.vue'
 Vue.use(uniNavBar)
 
+import login from '@/components/login/login.vue'
+Vue.use('login', login)
+
 // #ifndef VUE3
 Vue.config.productionTip = false
 App.mpType = 'app'

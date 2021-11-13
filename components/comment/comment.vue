@@ -37,7 +37,7 @@
 				</view>
 
 				<!-- 评论相关统计 -->
-				<view class="mbtn" @tap="">
+				<view class="mbtn" @tap="gotoComment">
 					<image class="micon" src="/static/msg.png" mode="aspectFit" />
 					<text class="mtext" v-if="type=='info' && oneInfoClone.comment_count>0 ">{{ oneInfoClone.comment_count }}</text>
 					<text class="mtext" v-if="type=='info' && oneInfoClone.comment_count<=0 ">评论</text>

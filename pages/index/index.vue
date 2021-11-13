@@ -127,7 +127,7 @@
 			</view>
 		</view>
 		
-		
+		<login ref="login" />
 	</view>
 </template>
 

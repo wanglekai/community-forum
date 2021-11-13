@@ -65,10 +65,10 @@
 </template>
 
 <script>
-	import {
-		mapState,
-		mapActions
-	} from 'vuex'
+	// import {
+	// 	mapState,
+	// 	mapActions
+	// } from 'vuex'
 
 	export default {
 		data() {
@@ -261,9 +261,9 @@
 				}
 			}
 		},
-		computed: {
-			...mapState(['loginState', 'userInfo'])
-		},
+		// computed: {
+		// 	...mapState(['loginState', 'userInfo'])
+		// },
 		// 必须要在onReady生命周期设置校验规则，因为onLoad生命周期组件可能尚未创建完毕
 		onReady() {
 			this.$refs.uForm.setRules(this.rules);
@@ -301,7 +301,7 @@
 			
 		},
 		methods: {
-			...mapActions(['userLoginAction', 'userLogoutAction']),
+			// ...mapActions(['userLoginAction', 'userLogoutAction']),
 			// 关闭弹窗
 			closeLogin() {
 				this.show = false
@@ -475,9 +475,9 @@
 					liked: res.data.user.liked,
 					commented: res.data.user.commented
 				}
-				this.userLoginAction(loginInfo)
-				uni.$emit('meUserLogin')
-				uni.$emit('indexUserLogin')
+				// this.userLoginAction(loginInfo)
+				// uni.$emit('meUserLogin')
+				// uni.$emit('indexUserLogin')
 			},
 			// 更改 登陆 注册 方式选择
 			sectionChange(index) {
